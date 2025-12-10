@@ -22,7 +22,9 @@ jobs:
       run: mvn com.github.spotbugs:spotbugs-maven-plugin:4.7.0.0:check
 
     - name: SCA - Dependency Check
-      run: run: mvn org.owasp:dependency-check-maven:8.3.0:check -DnvdApiKey=dummy
+      run: mvn org.owasp:dependency-check-maven:8.3.0:check -DnvdApiKey=dummy
+
+    
 
     - name: Build App
       run: mvn -DskipTests package
