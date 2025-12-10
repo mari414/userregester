@@ -1,0 +1,39 @@
+name: Java Security Pipeline
+
+on: [push]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Build & Test
+      run: mvn test
+
+    - name: SAST - SpotBugs
+      run: mvn com.github.spotbugs:spotbugs-maven-plugin:4.7.0.0:check
+
+    - name: SCA - Dependency Check
+      run: mvn org.owasp:dependency-check-maven:8.3.0:check
+
+    - name: Build App
+      run: mvn -DskipTests package
+
+    - name: Run App
+      run: |
+        nohup java -jar target/*.jar &
+        sleep 10
+
+    - name: DAST - ZAP Scan
+      run: |
+        docker run --rm -t owasp/zap2docker-stable zap-baseline.py \
+        -t http://localhost:8080 \
+        -r zap-report.html
